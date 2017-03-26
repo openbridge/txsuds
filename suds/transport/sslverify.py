@@ -6,9 +6,7 @@ from OpenSSL import SSL
 from twisted.python.failure import Failure
 
 from twisted.internet.ssl        import Certificate
-from twisted.internet._sslverify import (ClientTLSOptions, OpenSSLCertificateOptions,
-                                         _maybeSetHostNameIndication, SSL_CB_HANDSHAKE_START,
-                                         SSL_CB_HANDSHAKE_DONE)
+from twisted.internet._sslverify import ClientTLSOptions, OpenSSLCertificateOptions
 
 
 log = logging.getLogger(__name__)
@@ -153,9 +151,9 @@ class SSLClientConnectionCreator(ClientTLSOptions):
         @param ret: ignored
         @type ret:  ignored
         """
-        if where & SSL_CB_HANDSHAKE_START:
-            _maybeSetHostNameIndication(connection, self._hostnameBytes)
-        elif where & SSL_CB_HANDSHAKE_DONE:
+        if where & SSL.SSL_CB_HANDSHAKE_START:
+            connection.set_tlsext_host_name(self._hostnameBytes)
+        elif where & SSL.SSL_CB_HANDSHAKE_DONE:
             if self._ctx.get_verify_mode() != SSL.VERIFY_NONE:
                 try:
                     peer_cert = Certificate(connection.get_peer_certificate())
